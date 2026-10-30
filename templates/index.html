@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Ask questions about a document and see the page and paragraph each answer came from.">
+  <title>Knowva</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=Noto+Sans+Devanagari:wght@400;600&family=Noto+Sans+Tamil:wght@400;600&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Sans+Kannada:wght@400;600&family=Noto+Sans+Malayalam:wght@400;600&family=Noto+Sans+Bengali:wght@400;600&family=Noto+Sans+Gujarati:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="shell" id="shell">
+
+    <aside class="sidebar" id="sidebar" aria-label="Conversations">
+      <div class="sidebar-head">
+        <a class="wordmark" href="/" aria-label="Knowva home"><span>knowva</span></a>
+        <button class="icon-btn sidebar-close" id="closeSidebarBtn" type="button" aria-label="Close menu">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </div>
+      <button class="new-chat" id="newChatBtn" type="button">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>
+        New chat
+      </button>
+      <nav class="history" id="history" aria-label="Recent conversations"></nav>
+      <div class="sidebar-foot">
+        <button class="text-btn" id="themeBtn" type="button">Theme: auto</button>
+      </div>
+    </aside>
+
+    <div class="scrim" id="scrim" hidden></div>
+
+    <main class="main" id="main">
+      <header class="topbar">
+        <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="Open menu">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
+        </button>
+        <div class="doc-title" id="docTitle" hidden>
+          <span class="doc-type" id="docType"></span>
+          <span class="doc-name" id="docName"></span>
+        </div>
+        <div class="topbar-actions" id="topActions" hidden>
+          <button class="btn" id="summarizeBtn" type="button">Summarize</button>
+        </div>
+      </header>
+
+      <section class="stage intro-stage" id="emptyStage">
+        <div class="intro">
+          <h1>Ask a question. Get the page it came from.</h1>
+          <p class="lede">Upload a file and Knowva answers from its text, with the page and paragraph for each statement so you can check it yourself.</p>
+
+          <label class="dropzone" id="dropzone" tabindex="0" for="fileInput">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5M12 17v-6m-3 3 3-3 3 3"/></svg>
+            <span class="dz-text">
+              <strong>Drop a file here, or choose one</strong>
+              <small id="dzFormats">PDF, Word, text, Excel, PowerPoint, CSV, JSON, HTML</small>
+            </span>
+            <span class="btn primary dz-btn">Choose file</span>
+            <input type="file" id="fileInput" hidden>
+          </label>
+
+          <div class="upload-status" id="uploadStatus" hidden>
+            <span class="bar"></span>
+            <span id="uploadStatusText">Reading and indexing your file…</span>
+          </div>
+          <p class="form-error" id="uploadError" role="alert" hidden></p>
+
+          <figure class="sample" aria-label="Example of a cited answer">
+            <p>The notice period is thirty days. <span class="chip-static">p.4 ¶2</span></p>
+            <figcaption>Every statement carries the page and paragraph it was taken from. Click one to open the source.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section class="stage chat" id="chatStage" hidden>
+        <div class="transcript" id="transcript" aria-live="polite">
+          <div class="transcript-inner" id="transcriptInner"></div>
+        </div>
+        <div class="composer-wrap">
+          <form class="composer" id="composer" autocomplete="off">
+            <label class="sr-only" for="questionInput">Your question</label>
+            <textarea id="questionInput" rows="1" maxlength="2000" placeholder="Ask about this document"></textarea>
+            <div class="composer-row">
+              <button class="icon-btn mic" id="micBtn" type="button" aria-pressed="false" aria-label="Speak your question">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="7" y="2.5" width="6" height="10" rx="3"/><path d="M4.5 9.5a5.5 5.5 0 0 0 11 0M10 15v2.5"/></svg>
+              </button>
+              <label class="sr-only" for="speechLang">Speaking language</label>
+              <select id="speechLang" class="select-quiet"></select>
+              <span class="hint" id="composerHint">Enter to send, Shift+Enter for a new line</span>
+              <span class="count" id="charCount">0/2000</span>
+              <button class="send" id="sendBtn" type="submit" aria-label="Send question">
+                <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16V4M5 9l5-5 5 5"/></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <aside class="viewer" id="viewer" aria-label="Source viewer" aria-hidden="true">
+      <header class="viewer-head">
+        <div class="viewer-title">
+          <strong id="viewerLabel">Source</strong>
+          <span id="viewerFile"></span>
+        </div>
+        <div class="viewer-tabs" id="viewerTabs" role="tablist" hidden>
+          <button type="button" role="tab" data-tab="page" aria-selected="true">Page</button>
+          <button type="button" role="tab" data-tab="text" aria-selected="false">Text</button>
+        </div>
+        <button class="icon-btn" id="closeViewerBtn" type="button" aria-label="Close source viewer">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+        </button>
+      </header>
+      <div class="viewer-body" id="viewerBody"></div>
+    </aside>
+  </div>
+
+  <dialog id="summaryDialog" aria-labelledby="sumTitle">
+    <form id="summaryForm" novalidate>
+      <h2 id="sumTitle">Summarize this document</h2>
+      <p class="dialog-sub" id="sumFile"></p>
+
+      <div class="field">
+        <label for="sumLang">Language</label>
+        <select id="sumLang"></select>
+        <input type="text" id="sumLangOther" maxlength="38" placeholder="Type a language name" hidden>
+      </div>
+
+      <fieldset class="field">
+        <legend>File type</legend>
+        <div class="choices" id="sumFormats"></div>
+        <p class="hint" id="sumFormatHint"></p>
+      </fieldset>
+
+      <p class="hint" id="sumLangHint" hidden>Summaries in other languages can lose some nuance. Locations in brackets point to the original document.</p>
+      <p class="form-error" id="sumError" role="alert" hidden></p>
+
+      <div class="dialog-actions">
+        <button class="btn" type="button" id="sumCancel">Cancel</button>
+        <button class="btn primary" type="submit" id="sumGo">Create summary</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</body>
+</html>
