@@ -10,3 +10,84 @@ uploads/
 indexes/
 exports/
 .DS_Store
+
+
+Python cache files
+
+pycache/
+*.py[cod]
+*$py.class
+
+Virtual environments
+
+venv/
+.venv/
+env/
+
+Environment variables and secrets
+
+.env
+.env.*
+!.env.example
+
+Jupyter Notebook checkpoints
+
+.ipynb_checkpoints/
+
+Testing and coverage
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+IDE settings
+
+.vscode/
+.idea/
+
+Operating system files
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+Log files
+
+*.log
+
+Build files
+
+build/
+dist/
+*.egg-info/
+
+Temporary files
+
+*.tmp
+*.bak
+
+Local databases
+
+*.sqlite3
+*.db
+
+Model files (ignore large generated models by default)
+
+*.pkl
+*.joblib
+*.h5
+*.keras
+*.pt
+*.pth
+
+Dataset files (adjust these rules for your project)
+
+data/
+datasets/
+*.csv
+*.xlsx
+
+Python environment configuration
+
+pip-wheel-metadata/
+
